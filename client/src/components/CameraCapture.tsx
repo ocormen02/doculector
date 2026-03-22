@@ -6,12 +6,17 @@ import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useCamera } from '../hooks/useCamera'
 import { runDocumentValidations } from '../utils/runDocumentValidations'
+import { validateDocumentWithAi } from '../api/validateDocument'
 import { MESSAGES } from '../constants/messages'
+import type { DocumentAiValidationResult } from '../types/documentValidation'
 
 interface CameraCaptureProps {
   side: 'front' | 'back'
-  onCapture: (blob: Blob) => void
+  onCapture: (blob: Blob, aiResult?: DocumentAiValidationResult) => void
   onError: (message: string) => void
+  enableAi?: boolean
+  frontAiResult?: DocumentAiValidationResult | null
+  apiUrl?: string
 }
 
 const ERROR_MAP: Record<string, string> = {
@@ -21,7 +26,38 @@ const ERROR_MAP: Record<string, string> = {
   unknown: MESSAGES.CAPTURE_FAILED,
 }
 
-export function CameraCapture({ side, onCapture, onError }: CameraCaptureProps) {
+const AI_ERROR_MAP: Record<string, string> = {
+  no_document: MESSAGES.AI_NO_DOCUMENT,
+  blurry: MESSAGES.AI_BLURRY,
+  poor_lighting: MESSAGES.AI_LIGHTING,
+  bad_framing: MESSAGES.AI_FRAMING,
+  wrong_side: MESSAGES.AI_SIDE_MISMATCH,
+}
+
+function isAiValidationValid(result: DocumentAiValidationResult): boolean {
+  return (
+    result.documentDetected &&
+    !result.isBlurry &&
+    result.lightingOk &&
+    result.framingOk &&
+    result.sideMatches
+  )
+}
+
+function mapAiErrorsToMessage(errors: string[]): string {
+  const first = errors[0]
+  if (first && AI_ERROR_MAP[first]) return AI_ERROR_MAP[first]
+  return MESSAGES.AI_VALIDATION_FAILED
+}
+
+export function CameraCapture({
+  side,
+  onCapture,
+  onError,
+  enableAi = false,
+  frontAiResult = null,
+  apiUrl = '',
+}: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const stopCameraRef = useRef<() => void>(() => {})
@@ -72,13 +108,28 @@ export function CameraCapture({ side, onCapture, onError }: CameraCaptureProps) 
     setIsValidating(true)
     try {
       const result = await runDocumentValidations(blob)
-      if (result.valid) {
-        onCapture(blob)
-      } else {
+      if (!result.valid) {
         setValidationError(result.errors[0] ?? MESSAGES.CAPTURE_FAILED)
+        return
       }
+
+      if (enableAi) {
+        const aiResult = await validateDocumentWithAi(blob, side, apiUrl ?? '')
+        if (!isAiValidationValid(aiResult)) {
+          setValidationError(mapAiErrorsToMessage(aiResult.errors))
+          return
+        }
+        if (side === 'back' && frontAiResult && frontAiResult.documentType !== aiResult.documentType) {
+          setValidationError(MESSAGES.AI_FRONT_BACK_MISMATCH)
+          return
+        }
+        onCapture(blob, aiResult)
+        return
+      }
+
+      onCapture(blob)
     } catch {
-      setValidationError(MESSAGES.CAPTURE_FAILED)
+      setValidationError(enableAi ? MESSAGES.AI_VALIDATION_FAILED : MESSAGES.CAPTURE_FAILED)
     } finally {
       setIsValidating(false)
     }

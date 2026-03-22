@@ -11,6 +11,7 @@ import { ReviewStep } from './components/ReviewStep'
 import { StatusMessage } from './components/StatusMessage'
 import { compressImageForUpload } from './utils/imageUtils'
 import { MESSAGES } from './constants/messages'
+import type { DocumentAiValidationResult } from './types/documentValidation'
 
 type Step =
   | 'splash'
@@ -26,6 +27,7 @@ type Step =
   | 'error'
 
 const API_URL = import.meta.env.VITE_API_URL ?? ''
+const ENABLE_AI = import.meta.env.VITE_ENABLE_AI_DOCUMENT_VALIDATION === 'true'
 
 function AppLogo() {
   return (
@@ -72,6 +74,7 @@ function App() {
   const [personalData, setPersonalData] = useState<PersonalData | null>(null)
   const [frontBlob, setFrontBlob] = useState<Blob | null>(null)
   const [backBlob, setBackBlob] = useState<Blob | null>(null)
+  const [frontAiResult, setFrontAiResult] = useState<DocumentAiValidationResult | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const frontPreviewUrl = useMemo(
@@ -142,6 +145,7 @@ function App() {
     setPersonalData(null)
     setFrontBlob(null)
     setBackBlob(null)
+    setFrontAiResult(null)
     setErrorMessage(null)
   }, [])
 
@@ -206,11 +210,14 @@ function App() {
       <AppContainer>
         <CameraCapture
           side="front"
-          onCapture={(blob) => {
+          onCapture={(blob, aiResult) => {
             setFrontBlob(blob)
+            setFrontAiResult(aiResult ?? null)
             setStep('preview_front')
           }}
           onError={(msg) => setErrorMessage(msg)}
+          enableAi={ENABLE_AI}
+          apiUrl={API_URL}
         />
       </AppContainer>
     )
@@ -225,6 +232,7 @@ function App() {
           onUse={() => setStep('capture_back')}
           onRetake={() => {
             setFrontBlob(null)
+            setFrontAiResult(null)
             setStep('capture_front')
           }}
         />
@@ -242,6 +250,9 @@ function App() {
             setStep('preview_back')
           }}
           onError={(msg) => setErrorMessage(msg)}
+          enableAi={ENABLE_AI}
+          frontAiResult={frontAiResult}
+          apiUrl={API_URL}
         />
       </AppContainer>
     )

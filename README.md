@@ -37,7 +37,11 @@ Copie `.env.example` a `.env` en la raíz (para Vercel) o en `server/` (para Exp
 GMAIL_USER=su-email@gmail.com
 GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
 DOCUMENT_RECIPIENT=su-email@gmail.com
+OPENAI_API_KEY=sk-...           # Opcional: para validación AI de documentos
+VITE_ENABLE_AI_DOCUMENT_VALIDATION=false  # "true" para activar validación AI
 ```
+
+**Validación AI de documentos** (opcional): Configure `OPENAI_API_KEY` en el servidor y `VITE_ENABLE_AI_DOCUMENT_VALIDATION=true` en el cliente para habilitar validación de imágenes con OpenAI (cedula, dimex, especial).
 
 ### 3. Desarrollo local con Express
 

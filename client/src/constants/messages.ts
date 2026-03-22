@@ -56,4 +56,12 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   SEND_FAILED: 'No se pudo enviar el documento. Intente de nuevo más tarde.',
   REINTENTAR: 'Reintentar',
   VOLVER: 'Volver',
+  // AI validation messages
+  AI_NO_DOCUMENT: 'No se detectó un documento en la imagen.',
+  AI_BLURRY: 'La imagen está borrosa.',
+  AI_LIGHTING: 'La iluminación no es adecuada.',
+  AI_FRAMING: 'El documento no está dentro del recuadro.',
+  AI_SIDE_MISMATCH: 'La imagen no corresponde al lado esperado del documento.',
+  AI_FRONT_BACK_MISMATCH: 'El documento frontal y trasero no coinciden.',
+  AI_VALIDATION_FAILED: 'No se pudo validar la imagen. Intente de nuevo.',
 } as const

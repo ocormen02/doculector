@@ -5,9 +5,13 @@ import express from 'express'
 import cors from 'cors'
 import { jsPDF } from 'jspdf'
 import nodemailer from 'nodemailer'
+import { createOpenAiDocumentValidationProvider } from './services/openAiDocumentValidationProvider.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
+
+const documentValidationProvider = createOpenAiDocumentValidationProvider()
+console.log('[Server] AI document validation:', process.env.OPENAI_API_KEY ? 'OPENAI configured' : 'FALLBACK (OPENAI_API_KEY not set)')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -147,6 +151,37 @@ async function sendEmail(pdfBuffer, fullName = '') {
     ],
   })
 }
+
+app.post('/api/validate-document', async (req, res) => {
+  try {
+    const { imageBase64, side } = req.body || {}
+    const imageSize = typeof imageBase64 === 'string' ? Math.round(imageBase64.length / 1024) : 0
+    console.log(`[validate-document] Request received: side="${side}", imageBase64 length=${imageSize}KB`)
+    if (typeof imageBase64 !== 'string' || !['front', 'back'].includes(side)) {
+      console.warn('[validate-document] Invalid request: missing imageBase64 or invalid side')
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request: imageBase64 and side (front|back) required',
+      })
+    }
+    const result = await documentValidationProvider.validate(imageBase64, side)
+    console.log(`[validate-document] Success: documentType=${result.documentType}, valid=${result.documentDetected && !result.isBlurry && result.lightingOk && result.framingOk && result.sideMatches}`)
+    return res.json(result)
+  } catch (err) {
+    console.error('[validate-document] Error:', err.message)
+    const fallback = {
+      documentDetected: false,
+      documentType: 'unknown',
+      isBlurry: true,
+      lightingOk: false,
+      framingOk: false,
+      sideMatches: false,
+      confidence: 0,
+      errors: ['AI validation unavailable'],
+    }
+    return res.status(500).json(fallback)
+  }
+})
 
 app.post('/api/submit-document', async (req, res) => {
   try {

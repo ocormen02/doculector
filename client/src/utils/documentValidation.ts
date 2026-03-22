@@ -2,36 +2,47 @@ import { MESSAGES } from '../constants/messages'
 
 export type ValidationResult = { valid: boolean; error?: string }
 
-const BLUR_THRESHOLD = 45
-const BRIGHTNESS_MIN = 40
-const BRIGHTNESS_MAX = 220
-const CONTRAST_MIN = 25
-const RESOLUTION_MIN_WIDTH = 1280
-const RESOLUTION_MIN_HEIGHT = 720
-const RECTANGLE_VARIANCE_MIN = 150
+const BLUR_THRESHOLD = 25
+const BRIGHTNESS_MIN = 25
+const BRIGHTNESS_MAX = 235
+const CONTRAST_MIN = 12
+const RESOLUTION_MIN_WIDTH = 640
+const RESOLUTION_MIN_HEIGHT = 480
+const RECTANGLE_VARIANCE_MIN = 60
 const ALIGNMENT_MAX_DEGREES = 15
 const FRAME_CENTER_RATIO_MIN = 0.6
 
 /**
  * Converts a Blob to ImageData via canvas.
  */
+const IMAGE_DATA_MAX_SIZE = 640
+
 export async function imageDataFromBlob(blob: Blob): Promise<{ imageData: ImageData; width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(blob)
     img.onload = () => {
       URL.revokeObjectURL(url)
+      const origW = img.naturalWidth
+      const origH = img.naturalHeight
+      let w = origW
+      let h = origH
+      if (w > IMAGE_DATA_MAX_SIZE || h > IMAGE_DATA_MAX_SIZE) {
+        const scale = IMAGE_DATA_MAX_SIZE / Math.max(w, h)
+        w = Math.round(w * scale)
+        h = Math.round(h * scale)
+      }
       const canvas = document.createElement('canvas')
-      canvas.width = img.naturalWidth
-      canvas.height = img.naturalHeight
+      canvas.width = w
+      canvas.height = h
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         reject(new Error('Canvas context unavailable'))
         return
       }
-      ctx.drawImage(img, 0, 0)
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      resolve({ imageData, width: canvas.width, height: canvas.height })
+      ctx.drawImage(img, 0, 0, w, h)
+      const imageData = ctx.getImageData(0, 0, w, h)
+      resolve({ imageData, width: origW, height: origH })
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)

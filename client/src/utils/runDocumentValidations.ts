@@ -1,4 +1,3 @@
-import * as faceapi from '@vladmandic/face-api'
 import {
   imageDataFromBlob,
   detectBlur,
@@ -6,46 +5,12 @@ import {
   detectContrast,
   detectResolution,
   detectRectangle,
-  detectAlignment,
-  detectFramePosition,
 } from './documentValidation'
 import { MESSAGES } from '../constants/messages'
 
 export type ValidationResult = { valid: boolean; errors: string[] }
 
-const MODEL_BASE = '/models'
-let faceModelsLoaded = false
-
-async function ensureFaceModels(): Promise<boolean> {
-  if (faceModelsLoaded) return true
-  try {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_BASE)
-    faceModelsLoaded = true
-    return true
-  } catch (err) {
-    console.warn('Face detection models failed to load:', err)
-    return false
-  }
-}
-
-async function detectFace(blob: Blob): Promise<boolean> {
-  const loaded = await ensureFaceModels()
-  if (!loaded) return true
-
-  const img = await faceapi.bufferToImage(blob)
-  const options = new faceapi.TinyFaceDetectorOptions({
-    inputSize: 224,
-    scoreThreshold: 0.4,
-  })
-  const task = faceapi.detectSingleFace(img, options)
-  const detection = await task.run()
-  return detection != null
-}
-
-export async function runDocumentValidations(
-  blob: Blob,
-  side: 'front' | 'back'
-): Promise<ValidationResult> {
+export async function runDocumentValidations(blob: Blob): Promise<ValidationResult> {
   const errors: string[] = []
   let width = 0
   let height = 0
@@ -79,17 +44,6 @@ export async function runDocumentValidations(
 
   const rect = detectRectangle(imageData)
   if (!rect.valid && rect.error) errors.push(rect.error)
-
-  const align = detectAlignment(imageData)
-  if (!align.valid && align.error) errors.push(align.error)
-
-  const frame = detectFramePosition(imageData)
-  if (!frame.valid && frame.error) errors.push(frame.error)
-
-  if (side === 'front') {
-    const hasFace = await detectFace(blob)
-    if (!hasFace) errors.push(MESSAGES.NO_FACE_DETECTED)
-  }
 
   return {
     valid: errors.length === 0,

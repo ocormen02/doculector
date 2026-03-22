@@ -71,7 +71,7 @@ export function CameraCapture({ side, onCapture, onError }: CameraCaptureProps) 
     }
     setIsValidating(true)
     try {
-      const result = await runDocumentValidations(blob, side)
+      const result = await runDocumentValidations(blob)
       if (result.valid) {
         onCapture(blob)
       } else {

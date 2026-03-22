@@ -22,7 +22,14 @@ CRITICAL - SIDE VALIDATION (use correct error, NEVER default to "blurry"):
 - For "front" side: The image MUST show the FRONT of the document with a VISIBLE FACE (photo of the person). If you see the back of the document (signature area, barcode, no face) → sideMatches: false, errors: ["wrong_side"]
 - For "back" side: The image MUST show the BACK of the document (usually signature area, barcode, no face). If you see a face or the front layout → sideMatches: false, errors: ["wrong_side"]
 
-Return ONLY valid JSON, no other text:
+CRITICAL - FRAMING (framingOk: false, errors: ["bad_framing"]) REJECT when:
+- Document is upside down or rotated incorrectly (al revés, torcido)
+- Document is cut off at edges - corners, sides, or parts missing (cortado)
+- Only part of the document is visible (solo una parte)
+- Document is severely tilted or angled (más de ~15 grados)
+- Photo of a photo / screenshot / photocopy (mala fotografía del documento)
+- Document is not centered or does not fill most of the frame appropriately
+- framingOk: true ONLY when the ENTIRE document is visible, properly oriented, not tilted, centered, and it is a direct photo of the physical document.
 
 {
   "documentDetected": boolean,
@@ -40,7 +47,7 @@ Rules:
 - documentType: ONLY "cedula", "dimex", "especial" for valid Costa Rica IDs. ALWAYS use "unknown" for passports, driver's licenses, or any non-Costa Rica ID.
 - isBlurry: Use TRUE only when the image is genuinely blurry. Do NOT use blurry when the problem is wrong side or wrong document type.
 - lightingOk: Acceptable lighting (not too dark, not washed out)?
-- framingOk: Document centered and inside the frame?
+- framingOk: ENTIRE document visible, not cut off, not upside down, not tilted, properly centered, direct photo (not photo-of-photo)?
 - sideMatches: Does the image show the expected ${side}? Front=face visible, Back=no face.
 - errors: Use these exact codes. Priority order: "wrong_document_type" (if not CR doc), "wrong_side" (if wrong side), "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
 - confidence: 0-1`

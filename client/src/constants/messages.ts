@@ -60,7 +60,8 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   AI_NO_DOCUMENT: 'No se detectó un documento en la imagen.',
   AI_BLURRY: 'La imagen está borrosa.',
   AI_LIGHTING: 'La iluminación no es adecuada.',
-  AI_FRAMING: 'El documento no está dentro del recuadro.',
+  AI_FRAMING:
+    'El documento debe estar completo, centrado y bien encuadrado. No se aceptan documentos cortados, torcidos, invertidos, parciales ni fotos de pantalla.',
   AI_SIDE_MISMATCH: 'La imagen no corresponde al lado esperado del documento.',
   AI_WRONG_DOCUMENT:
     'Solo se aceptan documentos de identidad de Costa Rica: cédula, DIMEX o documento especial (refugiado, provisional, permiso de extranjero). No se aceptan pasaportes, licencias de conducir ni otras identificaciones.',

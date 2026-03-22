@@ -62,6 +62,8 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   AI_LIGHTING: 'La iluminación no es adecuada.',
   AI_FRAMING: 'El documento no está dentro del recuadro.',
   AI_SIDE_MISMATCH: 'La imagen no corresponde al lado esperado del documento.',
+  AI_WRONG_DOCUMENT:
+    'Solo se aceptan documentos de identidad de Costa Rica: cédula, DIMEX o documento especial (refugiado, provisional, permiso de extranjero). No se aceptan pasaportes, licencias de conducir ni otras identificaciones.',
   AI_FRONT_BACK_MISMATCH: 'El documento frontal y trasero no coinciden.',
   AI_VALIDATION_FAILED: 'No se pudo validar la imagen. Intente de nuevo.',
 } as const

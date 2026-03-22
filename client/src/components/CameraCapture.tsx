@@ -27,16 +27,18 @@ const ERROR_MAP: Record<string, string> = {
 }
 
 const AI_ERROR_MAP: Record<string, string> = {
+  wrong_document_type: MESSAGES.AI_WRONG_DOCUMENT,
+  wrong_side: MESSAGES.AI_SIDE_MISMATCH,
   no_document: MESSAGES.AI_NO_DOCUMENT,
   blurry: MESSAGES.AI_BLURRY,
   poor_lighting: MESSAGES.AI_LIGHTING,
   bad_framing: MESSAGES.AI_FRAMING,
-  wrong_side: MESSAGES.AI_SIDE_MISMATCH,
 }
 
 function isAiValidationValid(result: DocumentAiValidationResult): boolean {
   return (
     result.documentDetected &&
+    result.documentType !== 'unknown' &&
     !result.isBlurry &&
     result.lightingOk &&
     result.framingOk &&

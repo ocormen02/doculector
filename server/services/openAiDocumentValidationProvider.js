@@ -5,11 +5,25 @@ const VALIDATION_TIMEOUT_MS = 15000
 const VALID_DOCUMENT_TYPES = ['cedula', 'dimex', 'especial', 'unknown']
 
 function buildPrompt(side) {
-  return `You are analyzing an image of a Costa Rica identity document for quality validation. This is the ${side} side.
+  return `You are validating that an image shows a Costa Rica identity document. The user must capture the ${side} side.
 
-Analyze the image and return ONLY a valid JSON object with no other text. Do NOT claim legal authenticity validation.
+ONLY ACCEPT these 3 document types (Costa Rica official IDs):
+- cedula: Costa Rican national ID (cédula de identidad)
+- dimex: Costa Rica foreign resident ID (Documento de Identidad para Migrantes)
+- especial: Refugee, provisional, or foreigner permit (documento especial, refugiado, permiso de extranjero)
 
-Required JSON structure (use these exact keys):
+STRICTLY REJECT - use documentType: "unknown" and errors: ["wrong_document_type"]:
+- NO passports (pasaportes) - from any country
+- NO driver's licenses (licencias de conducir) - from any country
+- NO other identification cards (foreign IDs, student IDs, work permits from other countries, etc.)
+- ONLY cedula, dimex, especial from Costa Rica are valid
+
+CRITICAL - SIDE VALIDATION (use correct error, NEVER default to "blurry"):
+- For "front" side: The image MUST show the FRONT of the document with a VISIBLE FACE (photo of the person). If you see the back of the document (signature area, barcode, no face) → sideMatches: false, errors: ["wrong_side"]
+- For "back" side: The image MUST show the BACK of the document (usually signature area, barcode, no face). If you see a face or the front layout → sideMatches: false, errors: ["wrong_side"]
+
+Return ONLY valid JSON, no other text:
+
 {
   "documentDetected": boolean,
   "documentType": "cedula" | "dimex" | "especial" | "unknown",
@@ -18,27 +32,29 @@ Required JSON structure (use these exact keys):
   "framingOk": boolean,
   "sideMatches": boolean,
   "confidence": number (0-1),
-  "errors": string[] (empty array if valid)
+  "errors": string[]
 }
 
 Rules:
-- documentDetected: Is there a document in the image?
-- documentType: Costa Rica documents only. cedula=national ID, dimex=foreign resident ID, especial=refugee or provisional ID, unknown if unidentifiable.
-- isBlurry: Is the image blurry?
-- lightingOk: Is the lighting acceptable (not too dark, not washed out)?
-- framingOk: Is the document centered and inside the frame?
-- sideMatches: For "front" expect a face and primary identity layout. For "back" expect no face and different layout. Set true only if the image matches the expected side.
-- errors: Array of human-readable error codes in English (e.g. "no_document", "blurry", "poor_lighting", "bad_framing", "wrong_side"). Empty if all checks pass.
-- confidence: Your overall confidence 0-1.`
+- documentDetected: Is there a document/card visible in the image?
+- documentType: ONLY "cedula", "dimex", "especial" for valid Costa Rica IDs. ALWAYS use "unknown" for passports, driver's licenses, or any non-Costa Rica ID.
+- isBlurry: Use TRUE only when the image is genuinely blurry. Do NOT use blurry when the problem is wrong side or wrong document type.
+- lightingOk: Acceptable lighting (not too dark, not washed out)?
+- framingOk: Document centered and inside the frame?
+- sideMatches: Does the image show the expected ${side}? Front=face visible, Back=no face.
+- errors: Use these exact codes. Priority order: "wrong_document_type" (if not CR doc), "wrong_side" (if wrong side), "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
+- confidence: 0-1`
 }
 
-function buildValidationErrors(result) {
-  const errors = [...(result.errors || [])]
+function buildValidationErrors(result, docType) {
+  const errors = []
+  // Priority order: wrong document type > wrong side > no document > blur > lighting > framing
+  if (docType === 'unknown' && result.documentDetected) errors.push('wrong_document_type')
+  if (!result.sideMatches) errors.push('wrong_side')
   if (!result.documentDetected) errors.push('no_document')
   if (result.isBlurry) errors.push('blurry')
   if (!result.lightingOk) errors.push('poor_lighting')
   if (!result.framingOk) errors.push('bad_framing')
-  if (!result.sideMatches) errors.push('wrong_side')
   return errors.length > 0 ? errors : result.errors || []
 }
 
@@ -46,7 +62,7 @@ function parseResponse(text) {
   const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```\s*$/i, '').trim()
   const parsed = JSON.parse(cleaned)
   const docType = VALID_DOCUMENT_TYPES.includes(parsed.documentType) ? parsed.documentType : 'unknown'
-  return {
+  const normalized = {
     documentDetected: Boolean(parsed.documentDetected),
     documentType: docType,
     isBlurry: Boolean(parsed.isBlurry),
@@ -54,8 +70,10 @@ function parseResponse(text) {
     framingOk: Boolean(parsed.framingOk),
     sideMatches: Boolean(parsed.sideMatches),
     confidence: typeof parsed.confidence === 'number' ? Math.max(0, Math.min(1, parsed.confidence)) : 0,
-    errors: buildValidationErrors(parsed),
+    errors: [],
   }
+  normalized.errors = buildValidationErrors(parsed, docType)
+  return normalized
 }
 
 function createProvider() {

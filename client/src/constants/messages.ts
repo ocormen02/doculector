@@ -5,7 +5,7 @@ export const MESSAGES = {
 Su información personal será tratada con estricta confidencialidad y conforme a los principios de privacidad y resguardo de datos aplicables. Esta aplicación ha sido concebida para facilitar una recolección segura, ordenada y confidencial de su documentación.`,
   CONTINUAR: 'Continuar',
   NOMBRE_APELLIDOS: 'Datos personales',
-  NOMBRE_CON_APELLIDOS: 'Nombre y apellidos',
+  NOMBRE_CON_APELLIDOS: 'Nombre con apellidos',
   NOMBRE_CON_APELLIDOS_PLACEHOLDER: 'Ej.: María González López',
   ESTADO_CIVIL: 'Estado civil',
   ESTADO_CIVIL_SOLTERO: 'Soltero',
@@ -68,5 +68,5 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   AI_FRONT_BACK_MISMATCH: 'El documento frontal y trasero no coinciden.',
   AI_VALIDATION_FAILED: 'No se pudo validar la imagen. Intente de nuevo.',
   AI_SERVICE_UNAVAILABLE:
-    'El servicio de validación no está disponible. Verifique que el servidor esté activo y que OPENAI_API_KEY esté configurado.',
+    'El servicio de validación no está disponible. Asegúrese de que el servidor esté activo (npm run server) y OPENAI_API_KEY esté configurado.',
 } as const

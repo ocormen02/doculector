@@ -42,7 +42,8 @@ CRITICAL - FRAMING (framingOk: false, errors: ["bad_framing"]) REJECT when:
 - Document is TOO FAR AWAY / TOO SMALL in the frame (muy alejado) - the document must fill at least ~60% of the image area. A small margin around the document is OK, but if the document appears small with lots of empty space around it, REJECT. Many users take the photo too far away.
 - framingOk: true ONLY when the ENTIRE document is visible, properly oriented, not tilted, centered, fills the frame adequately (not too distant), and it is a direct photo of the physical document.
 
-Respond with valid JSON only. Return your analysis as a JSON object in this exact format:
+Return ONLY valid JSON, no other text:
+
 {
   "documentDetected": boolean,
   "documentType": "cedula" | "dimex" | "especial" | "unknown",
@@ -61,7 +62,7 @@ Rules:
 - lightingOk: Acceptable lighting (not too dark, not washed out)?
 - framingOk: ENTIRE document visible, not cut off, not upside down, not tilted, properly centered, fills frame (not too far/small - document should occupy ~60%+ of image), direct photo (not photo-of-photo)?
 - sideMatches: Does the image show the expected ${side}? Front=face visible, Back=no face.
-- errors: Use these exact codes. Priority order: "wrong_document_type", "wrong_side", "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
+- errors: Use these exact codes. Priority order: "wrong_document_type" (if not CR doc), "wrong_side" (if wrong side), "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
 - confidence: 0-1`
 }
 

@@ -6,7 +6,7 @@ import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useCamera } from '../hooks/useCamera'
 import { runDocumentValidations } from '../utils/runDocumentValidations'
-import { validateDocumentWithAi, DocumentValidationError } from '../api/validateDocument'
+import { validateDocumentWithAi } from '../api/validateDocument'
 import { MESSAGES } from '../constants/messages'
 import type { DocumentAiValidationResult } from '../types/documentValidation'
 
@@ -113,9 +113,8 @@ export function CameraCapture({
       if (enableAi) {
         // Con AI activo: capturar primero, validar con AI y mostrar sus errores
         const aiResult = await validateDocumentWithAi(blob, side, apiUrl ?? '')
-        const errors = Array.isArray(aiResult.errors) ? aiResult.errors : []
         if (!isAiValidationValid(aiResult)) {
-          setValidationError(mapAiErrorsToMessage(errors))
+          setValidationError(mapAiErrorsToMessage(aiResult.errors))
           return
         }
         if (side === 'back' && frontAiResult && frontAiResult.documentType !== aiResult.documentType) {
@@ -133,14 +132,7 @@ export function CameraCapture({
         return
       }
       onCapture(blob)
-    } catch (err) {
-      console.error('[CameraCapture] Validation error:', err)
-      if (enableAi && err instanceof DocumentValidationError) {
-        if (err.code === 'NETWORK' || err.code === 'TIMEOUT') {
-          setValidationError(MESSAGES.AI_SERVICE_UNAVAILABLE)
-          return
-        }
-      }
+    } catch {
       setValidationError(enableAi ? MESSAGES.AI_VALIDATION_FAILED : MESSAGES.CAPTURE_FAILED)
     } finally {
       setIsValidating(false)

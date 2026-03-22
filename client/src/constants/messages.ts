@@ -69,4 +69,6 @@ Su información personal será tratada con estricta confidencialidad y conforme 
     'Solo se aceptan documentos de identidad de Costa Rica: cédula, DIMEX o documento especial (refugiado, provisional, permiso de extranjero). No se aceptan pasaportes, licencias de conducir ni otras identificaciones.',
   AI_FRONT_BACK_MISMATCH: 'El documento frontal y trasero no coinciden.',
   AI_VALIDATION_FAILED: 'No se pudo validar la imagen. Intente de nuevo.',
+  AI_SERVICE_UNAVAILABLE:
+    'El servicio de validación no está disponible. Verifique que el servidor esté activo y que OPENAI_API_KEY esté configurado.',
 } as const

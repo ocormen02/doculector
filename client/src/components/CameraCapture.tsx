@@ -29,6 +29,7 @@ const ERROR_MAP: Record<string, string> = {
 }
 
 const AI_ERROR_MAP: Record<string, string> = {
+  'AI validation unavailable': MESSAGES.AI_SERVICE_UNAVAILABLE,
   wrong_document_type: MESSAGES.AI_WRONG_DOCUMENT,
   wrong_side: MESSAGES.AI_SIDE_MISMATCH,
   name_mismatch: MESSAGES.AI_NAME_MISMATCH,

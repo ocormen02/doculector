@@ -36,7 +36,8 @@ export async function validateDocumentWithAi(
       body.fullName = options.fullName.trim()
     }
 
-    const res = await fetch(`${apiUrl}/api/validate-document`, {
+    const url = `${apiUrl || ''}/api/validate-document`.replace(/\/+/g, '/')
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -45,10 +46,20 @@ export async function validateDocumentWithAi(
 
     clearTimeout(timeoutId)
 
-    const data = await res.json()
+    let data: unknown
+    try {
+      data = await res.json()
+    } catch {
+      throw new Error(res.ok ? 'Invalid response format' : 'Validation request failed')
+    }
+
+    if (typeof data === 'object' && data !== null && 'errors' in data && Array.isArray((data as { errors: unknown }).errors)) {
+      return data as DocumentAiValidationResult
+    }
 
     if (!res.ok) {
-      throw new Error(data?.error ?? 'Validation request failed')
+      const err = data as { error?: string }
+      throw new Error(err?.error ?? 'Validation request failed')
     }
 
     return data as DocumentAiValidationResult

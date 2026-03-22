@@ -14,11 +14,9 @@ interface CameraCaptureProps {
   side: 'front' | 'back'
   onCapture: (blob: Blob, aiResult?: DocumentAiValidationResult) => void
   onError: (message: string) => void
-  onNameMismatch?: () => void
   enableAi?: boolean
   frontAiResult?: DocumentAiValidationResult | null
   apiUrl?: string
-  fullName?: string
 }
 
 const ERROR_MAP: Record<string, string> = {
@@ -32,27 +30,21 @@ const AI_ERROR_MAP: Record<string, string> = {
   'AI validation unavailable': MESSAGES.AI_SERVICE_UNAVAILABLE,
   wrong_document_type: MESSAGES.AI_WRONG_DOCUMENT,
   wrong_side: MESSAGES.AI_SIDE_MISMATCH,
-  name_mismatch: MESSAGES.AI_NAME_MISMATCH,
   no_document: MESSAGES.AI_NO_DOCUMENT,
   blurry: MESSAGES.AI_BLURRY,
   poor_lighting: MESSAGES.AI_LIGHTING,
   bad_framing: MESSAGES.AI_FRAMING,
 }
 
-function isAiValidationValid(
-  result: DocumentAiValidationResult,
-  requireNameMatch: boolean
-): boolean {
-  const base =
+function isAiValidationValid(result: DocumentAiValidationResult): boolean {
+  return (
     result.documentDetected &&
     result.documentType !== 'unknown' &&
     !result.isBlurry &&
     result.lightingOk &&
     result.framingOk &&
     result.sideMatches
-  if (!base) return false
-  if (requireNameMatch && result.nameMatches === false) return false
-  return true
+  )
 }
 
 function mapAiErrorsToMessage(errors: string[]): string {
@@ -65,11 +57,9 @@ export function CameraCapture({
   side,
   onCapture,
   onError,
-  onNameMismatch,
   enableAi = false,
   frontAiResult = null,
   apiUrl = '',
-  fullName = '',
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
@@ -122,16 +112,8 @@ export function CameraCapture({
     try {
       if (enableAi) {
         // Con AI activo: capturar primero, validar con AI y mostrar sus errores
-        const aiResult = await validateDocumentWithAi(blob, side, apiUrl ?? '', {
-          fullName: side === 'front' ? fullName : undefined,
-        })
-        const requireNameMatch = side === 'front' && !!fullName.trim()
-        if (!isAiValidationValid(aiResult, requireNameMatch)) {
-          const firstError = aiResult.errors[0]
-          if (firstError === 'name_mismatch' && onNameMismatch) {
-            onNameMismatch()
-            return
-          }
+        const aiResult = await validateDocumentWithAi(blob, side, apiUrl ?? '')
+        if (!isAiValidationValid(aiResult)) {
           setValidationError(mapAiErrorsToMessage(aiResult.errors))
           return
         }

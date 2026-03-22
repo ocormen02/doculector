@@ -14,8 +14,8 @@ const FALLBACK_RESULT = Object.freeze({
 const VALIDATION_TIMEOUT_MS = 15000
 const VALID_DOCUMENT_TYPES = ['cedula', 'dimex', 'especial', 'unknown']
 
-function buildPrompt(side, fullName) {
-  let prompt = `You are validating that an image shows a Costa Rica identity document. The user must capture the ${side} side.
+function buildPrompt(side) {
+  return `You are validating that an image shows a Costa Rica identity document. The user must capture the ${side} side.
 
 ONLY ACCEPT these 3 document types (Costa Rica official IDs):
 - cedula: Costa Rican national ID (cédula de identidad)
@@ -41,22 +41,6 @@ CRITICAL - FRAMING (framingOk: false, errors: ["bad_framing"]) REJECT when:
 - Document is not centered or does not fill most of the frame appropriately
 - Document is TOO FAR AWAY / TOO SMALL in the frame (muy alejado) - the document must fill at least ~60% of the image area. A small margin around the document is OK, but if the document appears small with lots of empty space around it, REJECT. Many users take the photo too far away.
 - framingOk: true ONLY when the ENTIRE document is visible, properly oriented, not tilted, centered, fills the frame adequately (not too distant), and it is a direct photo of the physical document.
-`
-  if (side === 'front' && fullName && fullName.trim()) {
-    prompt += `
-CRITICAL - NAME VALIDATION (only for front side when fullName provided):
-The user entered this name: "${fullName.trim()}"
-- READ the name printed on the document (nombre del titular / holder name).
-- COMPARE: The user's name can be a PARTIAL match. ALLOW (nameMatches: true) when:
-  * The user entered a subset of the document name: e.g. document has "Juana Ramona Perez Soto", user entered "Juana Ramona Perez" → MATCH
-  * The user entered a subset (different part): e.g. document has "Juana Ramona Perez Soto", user entered "Ramona Perez Soto" → MATCH
-  * Full match (exact or with case/accent variations) → MATCH
-- Use flexible matching: ignore case, accents (á=a, é=e), extra spaces. If the user's words appear in the document name in order (consecutive or with gaps), it's a match.
-- REJECT (nameMatches: false) only when the names clearly do NOT relate - different person, different surnames, etc.
-- If you cannot read the name on the document clearly → nameMatches: false, add "name_mismatch"
-`
-  }
-  prompt += `
 
 Respond with valid JSON only. Return your analysis as a JSON object in this exact format:
 {
@@ -66,7 +50,6 @@ Respond with valid JSON only. Return your analysis as a JSON object in this exac
   "lightingOk": boolean,
   "framingOk": boolean,
   "sideMatches": boolean,
-  "nameMatches": boolean${side === 'front' && fullName ? ' (required when fullName provided)' : ' (omit or true for back)'},
   "confidence": number (0-1),
   "errors": string[]
 }
@@ -78,17 +61,14 @@ Rules:
 - lightingOk: Acceptable lighting (not too dark, not washed out)?
 - framingOk: ENTIRE document visible, not cut off, not upside down, not tilted, properly centered, fills frame (not too far/small - document should occupy ~60%+ of image), direct photo (not photo-of-photo)?
 - sideMatches: Does the image show the expected ${side}? Front=face visible, Back=no face.
-- nameMatches: (front only, when fullName provided) Does the name on the document match the user's entered name?
-- errors: Use these exact codes. Priority order: "wrong_document_type", "wrong_side", "name_mismatch" (if name provided and no match), "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
+- errors: Use these exact codes. Priority order: "wrong_document_type", "wrong_side", "no_document", "blurry", "poor_lighting", "bad_framing". Empty array if all pass.
 - confidence: 0-1`
-  return prompt
 }
 
-function buildValidationErrors(result, docType, fullName, side) {
+function buildValidationErrors(result, docType) {
   const errors = []
   if (docType === 'unknown' && result.documentDetected) errors.push('wrong_document_type')
   if (!result.sideMatches) errors.push('wrong_side')
-  if (side === 'front' && fullName && fullName.trim() && result.nameMatches === false) errors.push('name_mismatch')
   if (!result.documentDetected) errors.push('no_document')
   if (result.isBlurry) errors.push('blurry')
   if (!result.lightingOk) errors.push('poor_lighting')
@@ -96,7 +76,7 @@ function buildValidationErrors(result, docType, fullName, side) {
   return errors.length > 0 ? errors : result.errors || []
 }
 
-function parseResponse(text, fullName, side) {
+function parseResponse(text) {
   const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```\s*$/i, '').trim()
   const parsed = JSON.parse(cleaned)
   const docType = VALID_DOCUMENT_TYPES.includes(parsed.documentType) ? parsed.documentType : 'unknown'
@@ -107,11 +87,10 @@ function parseResponse(text, fullName, side) {
     lightingOk: Boolean(parsed.lightingOk),
     framingOk: Boolean(parsed.framingOk),
     sideMatches: Boolean(parsed.sideMatches),
-    nameMatches: parsed.nameMatches === undefined ? true : Boolean(parsed.nameMatches),
     confidence: typeof parsed.confidence === 'number' ? Math.max(0, Math.min(1, parsed.confidence)) : 0,
     errors: [],
   }
-  normalized.errors = buildValidationErrors(parsed, docType, fullName, side)
+  normalized.errors = buildValidationErrors(parsed, docType)
   return normalized
 }
 
@@ -124,7 +103,7 @@ export function createOpenAiDocumentValidationProvider() {
   const client = new OpenAI({ apiKey })
 
   return {
-    async validate(imageBase64, side, fullName) {
+    async validate(imageBase64, side) {
       if (!client || (side !== 'front' && side !== 'back')) {
         if (!client) console.warn('[AI Validation] Skipped: OpenAI client not configured (OPENAI_API_KEY missing)')
         else console.warn('[AI Validation] Skipped: invalid side=', side)
@@ -150,7 +129,7 @@ export function createOpenAiDocumentValidationProvider() {
               content: [
                 {
                   type: 'text',
-                  text: buildPrompt(side, fullName),
+                  text: buildPrompt(side),
                 },
                 {
                   type: 'image_url',
@@ -171,7 +150,7 @@ export function createOpenAiDocumentValidationProvider() {
           return { ...FALLBACK_RESULT }
         }
         console.log('[AI Validation] Raw model response:', content)
-        const parsed = parseResponse(content, fullName, side)
+        const parsed = parseResponse(content)
         console.log('[AI Validation] Parsed result:', JSON.stringify(parsed, null, 2))
         return parsed
       } catch (err) {

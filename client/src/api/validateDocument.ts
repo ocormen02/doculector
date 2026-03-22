@@ -19,7 +19,7 @@ export async function validateDocumentWithAi(
   blob: Blob,
   side: 'front' | 'back',
   apiUrl: string,
-  options?: { fullName?: string; timeoutMs?: number }
+  options?: { timeoutMs?: number }
 ): Promise<DocumentAiValidationResult> {
   const base64 = await blobToBase64(blob)
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS
@@ -28,14 +28,7 @@ export async function validateDocumentWithAi(
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
-    const body: { imageBase64: string; side: string; fullName?: string } = {
-      imageBase64: base64,
-      side,
-    }
-    if (side === 'front' && options?.fullName?.trim()) {
-      body.fullName = options.fullName.trim()
-    }
-
+    const body = { imageBase64: base64, side }
     const url = `${apiUrl || ''}/api/validate-document`.replace(/\/+/g, '/')
     const res = await fetch(url, {
       method: 'POST',

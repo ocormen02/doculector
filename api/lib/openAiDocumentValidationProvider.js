@@ -57,6 +57,8 @@ The user entered this name: "${fullName.trim()}"
 `
   }
   prompt += `
+
+Respond with valid JSON only. Return your analysis as a JSON object in this exact format:
 {
   "documentDetected": boolean,
   "documentType": "cedula" | "dimex" | "especial" | "unknown",

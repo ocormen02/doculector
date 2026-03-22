@@ -1,0 +1,14 @@
+{
+  "name": "recolector-documentos",
+  "private": true,
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "server": "cd server && npm start",
+    "install:all": "cd client && npm install && cd ../api && npm install && cd ../server && npm install"
+  },
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "nodemailer": "^6.9.16"
+  }
+}

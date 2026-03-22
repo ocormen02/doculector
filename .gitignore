@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables (secrets - no subir)
+.env
+.env.*
+!.env.example   # Sí se trackea: plantilla de variables sin valores sensibles
+
+# Build output
+dist/
+client/dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

@@ -1,0 +1,9 @@
+{
+  "name": "recolector-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "nodemailer": "^6.9.16"
+  }
+}

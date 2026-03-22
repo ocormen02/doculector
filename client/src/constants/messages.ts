@@ -1,0 +1,33 @@
+export const MESSAGES = {
+  WELCOME_TITLE: 'Bienvenido al sistema de recolección de documentos de identificación de la Licenciada Helen Chacón Arce.',
+  WELCOME_BODY: `Con el fin de dar seguimiento adecuado a su trámite legal, es necesario contar con imágenes legibles de ambas caras de su documento de identidad. La información recopilada por medio de esta aplicación será utilizada exclusivamente para fines relacionados con la gestión de su proceso legal.
+
+Su información personal será tratada con estricta confidencialidad y conforme a los principios de privacidad y resguardo de datos aplicables. Esta aplicación ha sido concebida para facilitar una recolección segura, ordenada y confidencial de su documentación.`,
+  CONTINUAR: 'Continuar',
+  NOMBRE_APELLIDOS: 'Nombre y apellidos',
+  NOMBRE_PLACEHOLDER: 'Ej.: María González López',
+  NOMBRE_REQUERIDO: 'Por favor, indique su nombre completo.',
+  ACTIVAR_CAMARA: 'Activar cámara',
+  CAPTURAR: 'Capturar',
+  USAR_FOTO: 'Usar esta foto',
+  TOMAR_DE_NUEVO: 'Tomar de nuevo',
+  FRONTAL: 'Frontal',
+  TRASERA: 'Trasera',
+  CAPTURE_FRENTE: 'Capture el frente de su documento',
+  CAPTURE_TRASERA: 'Capture la parte trasera de su documento',
+  FRAME_INSTRUCTION:
+    'Procure que el documento de identidad quede correctamente centrado dentro del recuadro delimitado por las líneas discontinuas.',
+  ENVIAR: 'Enviar',
+  PRIVACY_NOTE: 'Sus documentos serán enviados de forma segura.',
+  CAMERA_PERMISSION_DENIED:
+    'Se necesita permiso para usar la cámara. Por favor, habilítelo en la configuración del navegador.',
+  CAMERA_NOT_FOUND: 'No se encontró una cámara disponible.',
+  CAMERA_NOT_SUPPORTED: 'Su navegador no soporta el acceso a la cámara.',
+  CAPTURE_FAILED: 'No se pudo capturar la foto. Intente de nuevo.',
+  MISSING_PHOTOS: 'Debe capturar ambas caras del documento antes de enviar.',
+  SENDING: 'Enviando documento...',
+  SUCCESS: 'Documento enviado correctamente. Gracias.',
+  SEND_FAILED: 'No se pudo enviar el documento. Intente de nuevo más tarde.',
+  REINTENTAR: 'Reintentar',
+  VOLVER: 'Volver',
+} as const

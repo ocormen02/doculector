@@ -19,7 +19,21 @@ function parseBase64Image(data) {
   }
 }
 
-function createPdf(frontBuffer, backBuffer, fullName = '') {
+function buildFullName(personalData) {
+  if (!personalData) return ''
+  if (personalData.nombreCompleto && String(personalData.nombreCompleto).trim()) {
+    return String(personalData.nombreCompleto).trim()
+  }
+  const parts = [
+    personalData.nombre,
+    personalData.apellido,
+    personalData.segundoApellido,
+  ].filter(Boolean)
+  return parts.map((p) => (p || '').trim()).join(' ').trim()
+}
+
+function createPdf(frontBuffer, backBuffer, personalData) {
+  const fullName = personalData ? buildFullName(personalData) : ''
   const doc = new jsPDF({ format: 'a4', unit: 'mm', orientation: 'portrait' })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -28,19 +42,41 @@ function createPdf(frontBuffer, backBuffer, fullName = '') {
   const labelHeight = 6
   const nameHeight = 12
   const centerX = pageWidth / 2
+  const lineHeight = 6
+  let contentTop = margin
 
-  if (fullName && fullName.trim()) {
+  if (personalData) {
+    const textWidth = pageWidth - 2 * margin
+    doc.setFontSize(9)
+    let y = contentTop
+    const lineSpacing = 5.5
+
+    const addField = (label, value) => {
+      if (!value || !String(value).trim()) return
+      const fullText = `${label}: ${String(value).trim()}`
+      const lines = doc.splitTextToSize(fullText, textWidth)
+      lines.forEach((line) => {
+        doc.text(line, margin, y)
+        y += lineSpacing
+      })
+      y += 2
+    }
+
+    addField('Nombre', fullName)
+    addField('Estado civil', personalData.estadoCivil)
+    const lugar = [personalData.provincia, personalData.canton, personalData.distrito].filter(Boolean).join(' / ')
+    addField('Lugar', lugar)
+    addField('Dirección', personalData.direccionExacta)
+    contentTop = y + 6
+  } else if (fullName) {
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text(fullName.trim(), centerX, margin + nameHeight / 2, { align: 'center' })
+    doc.text(fullName.trim(), centerX, contentTop + nameHeight / 2, { align: 'center' })
     doc.setFont('helvetica', 'normal')
+    contentTop += nameHeight + 8
   }
-
-  const contentTop = margin + (fullName.trim() ? nameHeight + 8 : 0)
-  const aspectRatio = 85.6 / 54
-  const maxImgWidth = pageWidth - 2 * margin
-  const imgWidth = Math.min(maxImgWidth, 130)
-  const imgHeight = imgWidth / aspectRatio
+  const imgWidth = 85.6
+  const imgHeight = 53.98
   const blockHeight = labelHeight + imgHeight
   const totalHeight = 2 * blockHeight + gap
   const topOffset = contentTop + (pageHeight - contentTop - margin - totalHeight) / 2
@@ -113,7 +149,8 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
-    const { fullName, frontBase64, backBase64 } = body || {}
+    const { personalData, fullName, frontBase64, backBase64 } = body || {}
+    const data = personalData || (fullName ? { nombreCompleto: fullName } : null)
 
     const frontBuffer = parseBase64Image(frontBase64)
     const backBuffer = parseBase64Image(backBase64)
@@ -125,8 +162,9 @@ export default async function handler(req, res) {
       })
     }
 
-    const pdfBuffer = createPdf(frontBuffer, backBuffer, fullName)
-    await sendEmail(pdfBuffer, fullName)
+    const displayName = data ? buildFullName(data) : (fullName || '')
+    const pdfBuffer = createPdf(frontBuffer, backBuffer, data)
+    await sendEmail(pdfBuffer, displayName)
 
     return res.status(200).json({ success: true })
   } catch (err) {

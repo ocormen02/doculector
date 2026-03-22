@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { WelcomeStep } from './components/WelcomeStep'
-import { NameStep } from './components/NameStep'
+import { InformationStep, type PersonalData } from './components/InformationStep'
 import logoImg from './assets/logo.png'
 import { CameraCapture } from './components/CameraCapture'
 import { ImagePreview } from './components/ImagePreview'
@@ -30,7 +30,7 @@ function AppLogo() {
 
 function App() {
   const [step, setStep] = useState<Step>('welcome')
-  const [fullName, setFullName] = useState<string>('')
+  const [personalData, setPersonalData] = useState<PersonalData | null>(null)
   const [frontBlob, setFrontBlob] = useState<Blob | null>(null)
   const [backBlob, setBackBlob] = useState<Blob | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -59,7 +59,7 @@ function App() {
   }, [backPreviewUrl])
 
   const handleSend = useCallback(async () => {
-    if (!frontBlob || !backBlob || !fullName.trim()) return
+    if (!frontBlob || !backBlob || !personalData) return
 
     setStep('sending')
     setErrorMessage(null)
@@ -74,7 +74,7 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: fullName.trim(),
+          personalData,
           frontBase64,
           backBase64,
         }),
@@ -91,7 +91,7 @@ function App() {
       setErrorMessage(err instanceof Error ? err.message : MESSAGES.SEND_FAILED)
       setStep('error')
     }
-  }, [frontBlob, backBlob, fullName])
+  }, [frontBlob, backBlob, personalData])
 
   const handleRetrySend = useCallback(() => {
     setStep('review')
@@ -100,7 +100,7 @@ function App() {
 
   const handleBackToStart = useCallback(() => {
     setStep('welcome')
-    setFullName('')
+    setPersonalData(null)
     setFrontBlob(null)
     setBackBlob(null)
     setErrorMessage(null)
@@ -155,8 +155,8 @@ function App() {
     return (
       <div className="app-container">
         <AppLogo />
-        <NameStep onContinue={(name) => {
-          setFullName(name)
+        <InformationStep onContinue={(data) => {
+          setPersonalData(data)
           setStep('capture_front')
         }} />
       </div>
@@ -240,7 +240,7 @@ function App() {
           onRetakeBack={() => setStep('capture_back')}
           onSend={handleSend}
           isSending={false}
-          canSend={!!frontPreviewUrl && !!backPreviewUrl && !!fullName.trim()}
+          canSend={!!frontPreviewUrl && !!backPreviewUrl && !!personalData}
         />
       </div>
     )

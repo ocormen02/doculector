@@ -1,4 +1,11 @@
 import { useState, useMemo } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Button from '@mui/material/Button'
+import Alert from '@mui/material/Alert'
+import Grid from '@mui/material/Grid'
 import { MESSAGES } from '../constants/messages'
 import ubicacionData from '../data/ubicacion-costa-rica.json'
 
@@ -92,145 +99,115 @@ export function InformationStep({ onContinue }: InformationStepProps) {
   const clearError = () => setError('')
 
   return (
-    <div className="step information-step">
-      <h2 className="step-title">{MESSAGES.NOMBRE_APELLIDOS}</h2>
-      <form onSubmit={handleSubmit} className="name-form">
-        <div className="form-field">
-          <label htmlFor="nombreCompleto">{MESSAGES.NOMBRE_CON_APELLIDOS} <span className="required">*</span></label>
-          <input
-            id="nombreCompleto"
-            type="text"
-            value={nombreCompleto}
-            onChange={(e) => {
-              setNombreCompleto(e.target.value)
-              clearError()
-            }}
-            placeholder={MESSAGES.NOMBRE_CON_APELLIDOS_PLACEHOLDER}
-            className="name-input"
-            autoComplete="name"
-            required
-          />
-        </div>
-        <div className="form-field">
-          <label htmlFor="estadoCivil">{MESSAGES.ESTADO_CIVIL} <span className="required">*</span></label>
-          <select
-            id="estadoCivil"
-            value={estadoCivil}
-            onChange={(e) => {
-              setEstadoCivil(e.target.value)
-              clearError()
-            }}
-            className="name-input select-input"
-            required
-          >
-            <option value="">{MESSAGES.ESTADO_CIVIL}</option>
-            {ESTADOS_CIVILES.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-field">
-          <label htmlFor="ocupacion">{MESSAGES.OCUPACION} <span className="required">*</span></label>
-          <input
-            id="ocupacion"
-            type="text"
-            value={ocupacion}
-            onChange={(e) => {
-              setOcupacion(e.target.value)
-              clearError()
-            }}
-            placeholder={MESSAGES.OCUPACION_PLACEHOLDER}
-            className="name-input"
-            autoComplete="organization-title"
-            required
-          />
-        </div>
-        <div className="form-field">
-          <label htmlFor="provincia">{MESSAGES.PROVINCIA} <span className="required">*</span></label>
-          <select
-            id="provincia"
-            value={provincia}
-            onChange={(e) => {
-              setProvincia(e.target.value)
-              resetCascading('all')
-              clearError()
-            }}
-            className="name-input select-input"
-            required
-          >
-            <option value="">{MESSAGES.PROVINCIA_PLACEHOLDER}</option>
-            {provincias.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-field">
-          <label htmlFor="canton">{MESSAGES.CANTON} <span className="required">*</span></label>
-          <select
-            id="canton"
-            value={canton}
-            onChange={(e) => {
-              setCanton(e.target.value)
-              resetCascading('distrito')
-              clearError()
-            }}
-            className="name-input select-input"
-            disabled={!provincia}
-            required
-          >
-            <option value="">{MESSAGES.CANTON_PLACEHOLDER}</option>
-            {cantones.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-field">
-          <label htmlFor="distrito">{MESSAGES.DISTRITO} <span className="required">*</span></label>
-          <select
-            id="distrito"
-            value={distrito}
-            onChange={(e) => {
-              setDistrito(e.target.value)
-              clearError()
-            }}
-            className="name-input select-input"
-            disabled={!canton}
-            required
-          >
-            <option value="">{MESSAGES.DISTRITO_PLACEHOLDER}</option>
-            {distritos.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-field">
-          <label htmlFor="direccionExacta">{MESSAGES.DIRECCION_EXACTA} <span className="required">*</span></label>
-          <textarea
-            id="direccionExacta"
+    <Box sx={{ width: '100%', maxHeight: { xs: '85svh', md: 'none' }, overflowY: 'auto' }}>
+      <Typography variant="h6" align="center" gutterBottom>
+        {MESSAGES.NOMBRE_APELLIDOS}
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: '100%' }}>
+        <Grid container spacing={1.5} sx={{ width: '100%' }}>
+          <Grid size={12}>
+            <TextField
+              fullWidth
+              label={MESSAGES.NOMBRE_CON_APELLIDOS}
+              value={nombreCompleto}
+              onChange={(e) => { setNombreCompleto(e.target.value); clearError() }}
+              placeholder={MESSAGES.NOMBRE_CON_APELLIDOS_PLACEHOLDER}
+              autoComplete="name"
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              select
+              label={MESSAGES.ESTADO_CIVIL}
+              value={estadoCivil}
+              onChange={(e) => { setEstadoCivil(e.target.value); clearError() }}
+              required
+            >
+              <MenuItem value="">{MESSAGES.ESTADO_CIVIL}</MenuItem>
+              {ESTADOS_CIVILES.map((opt) => (
+                <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              label={MESSAGES.OCUPACION}
+              value={ocupacion}
+              onChange={(e) => { setOcupacion(e.target.value); clearError() }}
+              placeholder={MESSAGES.OCUPACION_PLACEHOLDER}
+              autoComplete="organization-title"
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              select
+              label={MESSAGES.PROVINCIA}
+              value={provincia}
+              onChange={(e) => { setProvincia(e.target.value); resetCascading('all'); clearError() }}
+              required
+            >
+              <MenuItem value="">{MESSAGES.PROVINCIA_PLACEHOLDER}</MenuItem>
+              {provincias.map((p) => (
+                <MenuItem key={p} value={p}>{p}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TextField
+              fullWidth
+              select
+              label={MESSAGES.CANTON}
+              value={canton}
+              onChange={(e) => { setCanton(e.target.value); resetCascading('distrito'); clearError() }}
+              disabled={!provincia}
+              required
+            >
+              <MenuItem value="">{MESSAGES.CANTON_PLACEHOLDER}</MenuItem>
+              {cantones.map((c) => (
+                <MenuItem key={c} value={c}>{c}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid size={12}>
+            <TextField
+              fullWidth
+              select
+              label={MESSAGES.DISTRITO}
+              value={distrito}
+              onChange={(e) => { setDistrito(e.target.value); clearError() }}
+              disabled={!canton}
+              required
+            >
+              <MenuItem value="">{MESSAGES.DISTRITO_PLACEHOLDER}</MenuItem>
+              {distritos.map((d) => (
+                <MenuItem key={d} value={d}>{d}</MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+        </Grid>
+        <Box sx={{ width: '100%', minWidth: 0 }}>
+          <TextField
+            fullWidth
+            label={MESSAGES.DIRECCION_EXACTA}
             value={direccionExacta}
-            onChange={(e) => {
-              setDireccionExacta(e.target.value)
-              clearError()
-            }}
+            onChange={(e) => { setDireccionExacta(e.target.value); clearError() }}
             placeholder={MESSAGES.DIRECCION_PLACEHOLDER}
-            className="name-input textarea-input"
+            multiline
             rows={4}
             required
+            sx={{ width: '100%' }}
           />
-        </div>
-        {error && <p className="name-error">{error}</p>}
-        <button type="submit" className="btn btn-primary">
+        </Box>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Button type="submit" variant="contained" size="large" fullWidth>
           {MESSAGES.CONTINUAR}
-        </button>
-      </form>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   )
 }

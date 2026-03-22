@@ -1,3 +1,8 @@
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
 import { MESSAGES } from '../constants/messages'
 
 interface ReviewStepProps {
@@ -22,37 +27,79 @@ export function ReviewStep({
   const canSend = canSendProp ?? Boolean(frontPreview && backPreview)
 
   return (
-    <div className="step review-step">
-      <h2 className="step-title">{MESSAGES.FRONTAL} / {MESSAGES.TRASERA}</h2>
-      <div className="review-previews">
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Typography variant="h6" align="center" gutterBottom>
+        {MESSAGES.FRONTAL} / {MESSAGES.TRASERA}
+      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 1.5,
+          justifyContent: 'center',
+        }}
+      >
         {frontPreview && (
-          <div className="preview-card">
-            <p className="preview-label">{MESSAGES.FRONTAL}</p>
-            <img src={frontPreview} alt={MESSAGES.FRONTAL} className="preview-image" />
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onRetakeFront}>
-              {MESSAGES.TOMAR_DE_NUEVO}
-            </button>
-          </div>
+          <Card sx={{ flex: 1, maxWidth: { md: 280 } }}>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600}>
+                {MESSAGES.FRONTAL}
+              </Typography>
+              <Box
+                component="img"
+                src={frontPreview}
+                alt={MESSAGES.FRONTAL}
+                sx={{
+                  width: '100%',
+                  aspectRatio: 1.586,
+                  objectFit: 'contain',
+                  borderRadius: 1,
+                  bgcolor: 'grey.100',
+                }}
+              />
+              <Button variant="outlined" size="small" onClick={onRetakeFront}>
+                {MESSAGES.TOMAR_DE_NUEVO}
+              </Button>
+            </CardContent>
+          </Card>
         )}
         {backPreview && (
-          <div className="preview-card">
-            <p className="preview-label">{MESSAGES.TRASERA}</p>
-            <img src={backPreview} alt={MESSAGES.TRASERA} className="preview-image" />
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onRetakeBack}>
-              {MESSAGES.TOMAR_DE_NUEVO}
-            </button>
-          </div>
+          <Card sx={{ flex: 1, maxWidth: { md: 280 } }}>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="subtitle2" fontWeight={600}>
+                {MESSAGES.TRASERA}
+              </Typography>
+              <Box
+                component="img"
+                src={backPreview}
+                alt={MESSAGES.TRASERA}
+                sx={{
+                  width: '100%',
+                  aspectRatio: 1.586,
+                  objectFit: 'contain',
+                  borderRadius: 1,
+                  bgcolor: 'grey.100',
+                }}
+              />
+              <Button variant="outlined" size="small" onClick={onRetakeBack}>
+                {MESSAGES.TOMAR_DE_NUEVO}
+              </Button>
+            </CardContent>
+          </Card>
         )}
-      </div>
-      <p className="privacy-note">{MESSAGES.PRIVACY_NOTE}</p>
-      <button
-        type="button"
-        className="btn btn-primary btn-send"
+      </Box>
+      <Typography variant="body2" color="text.secondary" align="center">
+        {MESSAGES.PRIVACY_NOTE}
+      </Typography>
+      <Button
+        variant="contained"
+        size="large"
         onClick={onSend}
         disabled={!canSend || isSending}
+        fullWidth
       >
         {MESSAGES.ENVIAR}
-      </button>
-    </div>
+      </Button>
+    </Box>
   )
 }

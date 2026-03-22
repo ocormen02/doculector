@@ -1,4 +1,7 @@
 import { useEffect, useRef } from 'react'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
 import { useCamera } from '../hooks/useCamera'
 import { MESSAGES } from '../constants/messages'
 
@@ -67,48 +70,128 @@ export function CameraCapture({ side, onCapture, onError }: CameraCaptureProps) 
 
   if (error) {
     return (
-      <div className="camera-error">
-        <p>{ERROR_MAP[error] ?? MESSAGES.CAPTURE_FAILED}</p>
-        <button type="button" className="btn btn-secondary" onClick={startCamera}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1.5,
+          width: '100%',
+        }}
+      >
+        <Typography color="text.secondary" align="center">
+          {ERROR_MAP[error] ?? MESSAGES.CAPTURE_FAILED}
+        </Typography>
+        <Button variant="outlined" onClick={startCamera}>
           {MESSAGES.REINTENTAR}
-        </button>
-      </div>
+        </Button>
+      </Box>
     )
   }
 
   if (!isReady) {
     return (
-      <div className="camera-setup">
-        <p>{instruction}</p>
-        <p className="camera-frame-instruction">{MESSAGES.FRAME_INSTRUCTION}</p>
-        <button type="button" className="btn btn-primary" onClick={startCamera}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1.5,
+          width: '100%',
+        }}
+      >
+        <Typography color="text.secondary" align="center">
+          {instruction}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ opacity: 0.9 }}>
+          {MESSAGES.FRAME_INSTRUCTION}
+        </Typography>
+        <Button variant="contained" onClick={startCamera}>
           {MESSAGES.ACTIVAR_CAMARA}
-        </button>
-      </div>
+        </Button>
+      </Box>
     )
   }
 
   return (
-    <div className="camera-capture">
-      <p className="camera-instruction">{instruction}</p>
-      <p className="camera-frame-instruction">{MESSAGES.FRAME_INSTRUCTION}</p>
-      <div className="camera-capture-inner">
-        <div className="camera-frame-wrapper">
-          <video
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 1,
+        width: '100%',
+      }}
+    >
+      <Typography color="text.secondary" align="center">
+        {instruction}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" align="center" sx={{ opacity: 0.9 }}>
+        {MESSAGES.FRAME_INSTRUCTION}
+      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+          gap: 1,
+          width: '100%',
+          maxWidth: { xs: 340, md: 420 },
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '4 / 3',
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: 'black',
+          }}
+        >
+          <Box
+            component="video"
             ref={videoRef}
             autoPlay
             playsInline
             muted
-            className="camera-video"
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
           />
-          <div className="camera-overlay" aria-hidden="true">
-            <div ref={frameRef} className="id-frame" />
-          </div>
-        </div>
-        <button type="button" className="btn btn-primary btn-capture" onClick={handleCapture}>
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          >
+            <Box
+              ref={frameRef}
+              aria-hidden
+              sx={{
+                width: '90%',
+                maxWidth: 300,
+                aspectRatio: '85.6 / 54',
+                border: '4px dashed white',
+                borderRadius: 1,
+                bgcolor: 'rgba(0,0,0,0.25)',
+                flexShrink: 0,
+              }}
+            />
+          </Box>
+        </Box>
+        <Button variant="contained" onClick={handleCapture} size="large" fullWidth>
           {MESSAGES.CAPTURAR}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   )
 }

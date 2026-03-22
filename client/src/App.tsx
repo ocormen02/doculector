@@ -1,4 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import { SplashStep } from './components/SplashStep'
 import { WelcomeStep } from './components/WelcomeStep'
 import { InformationStep, type PersonalData } from './components/InformationStep'
 import logoImg from './assets/logo.png'
@@ -7,10 +10,10 @@ import { ImagePreview } from './components/ImagePreview'
 import { ReviewStep } from './components/ReviewStep'
 import { StatusMessage } from './components/StatusMessage'
 import { compressImageForUpload } from './utils/imageUtils'
-import './App.css'
 import { MESSAGES } from './constants/messages'
 
 type Step =
+  | 'splash'
   | 'welcome'
   | 'name'
   | 'capture_front'
@@ -25,11 +28,47 @@ type Step =
 const API_URL = import.meta.env.VITE_API_URL ?? ''
 
 function AppLogo() {
-  return <img src={logoImg} alt="Recolector de documentos" className="app-logo" />
+  return (
+    <Box
+      component="img"
+      src={logoImg}
+      alt="Recolector de documentos"
+      sx={{
+        width: 'auto',
+        height: { xs: 180, md: 200 },
+        maxWidth: { xs: 320, md: 360 },
+        objectFit: 'contain',
+        mb: { xs: 1, md: 1.5 },
+        flexShrink: 0,
+      }}
+    />
+  )
+}
+
+function AppContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: '100svh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: { xs: 1.5, md: 2 },
+        px: { xs: 1.5, md: 2 },
+      }}
+    >
+      <AppLogo />
+      <Box sx={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {children}
+      </Box>
+    </Container>
+  )
 }
 
 function App() {
-  const [step, setStep] = useState<Step>('welcome')
+  const [step, setStep] = useState<Step>('splash')
   const [personalData, setPersonalData] = useState<PersonalData | null>(null)
   const [frontBlob, setFrontBlob] = useState<Blob | null>(null)
   const [backBlob, setBackBlob] = useState<Blob | null>(null)
@@ -108,65 +147,63 @@ function App() {
 
   if (step === 'sending') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <StatusMessage type="loading" message={MESSAGES.SENDING} />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'success') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <StatusMessage
           type="success"
           message={MESSAGES.SUCCESS}
           onBack={handleBackToStart}
         />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'error') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <StatusMessage
           type="error"
           message={errorMessage ?? MESSAGES.SEND_FAILED}
           onRetry={handleRetrySend}
           onBack={handleBackToStart}
         />
-      </div>
+      </AppContainer>
     )
+  }
+
+  if (step === 'splash') {
+    return <SplashStep onComplete={() => setStep('welcome')} />
   }
 
   if (step === 'welcome') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <WelcomeStep onContinue={() => setStep('name')} />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'name') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <InformationStep onContinue={(data) => {
           setPersonalData(data)
           setStep('capture_front')
         }} />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'capture_front') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <CameraCapture
           side="front"
           onCapture={(blob) => {
@@ -175,14 +212,13 @@ function App() {
           }}
           onError={(msg) => setErrorMessage(msg)}
         />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'preview_front' && frontPreviewUrl) {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <ImagePreview
           src={frontPreviewUrl}
           label={MESSAGES.FRONTAL}
@@ -192,14 +228,13 @@ function App() {
             setStep('capture_front')
           }}
         />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'capture_back') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <CameraCapture
           side="back"
           onCapture={(blob) => {
@@ -208,14 +243,13 @@ function App() {
           }}
           onError={(msg) => setErrorMessage(msg)}
         />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'preview_back' && backPreviewUrl) {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <ImagePreview
           src={backPreviewUrl}
           label={MESSAGES.TRASERA}
@@ -225,14 +259,13 @@ function App() {
             setStep('capture_back')
           }}
         />
-      </div>
+      </AppContainer>
     )
   }
 
   if (step === 'review') {
     return (
-      <div className="app-container">
-        <AppLogo />
+      <AppContainer>
         <ReviewStep
           frontPreview={frontPreviewUrl}
           backPreview={backPreviewUrl}
@@ -242,7 +275,7 @@ function App() {
           isSending={false}
           canSend={!!frontPreviewUrl && !!backPreviewUrl && !!personalData}
         />
-      </div>
+      </AppContainer>
     )
   }
 

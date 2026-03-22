@@ -76,8 +76,8 @@ function createPdf(frontBuffer, backBuffer, personalData) {
     doc.setFont('helvetica', 'normal')
     contentTop += nameHeight + 8
   }
-  const imgWidth = 85.6
-  const imgHeight = 53.98
+  const imgWidth = 115
+  const imgHeight = 72.5
   const blockHeight = labelHeight + imgHeight
   const totalHeight = 2 * blockHeight + gap
   const topOffset = contentTop + (pageHeight - contentTop - margin - totalHeight) / 2

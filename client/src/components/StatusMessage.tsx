@@ -1,3 +1,7 @@
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import { MESSAGES } from '../constants/messages'
 
 interface StatusMessageProps {
@@ -9,19 +13,37 @@ interface StatusMessageProps {
 
 export function StatusMessage({ type, message, onRetry, onBack }: StatusMessageProps) {
   return (
-    <div className={`status-message status-${type}`}>
-      <p className="status-text">{message}</p>
-      {type === 'loading' && <div className="spinner" aria-hidden="true" />}
+    <Box
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 1.5,
+        textAlign: 'center',
+        py: 3,
+      }}
+    >
+      <Typography
+        variant="body1"
+        sx={{
+          color: type === 'success' ? 'success.main' : type === 'error' ? 'error.main' : 'text.primary',
+        }}
+      >
+        {message}
+      </Typography>
+      {type === 'loading' && <CircularProgress aria-hidden />}
       {type === 'error' && onRetry && (
-        <button type="button" className="btn btn-primary" onClick={onRetry}>
+        <Button variant="contained" onClick={onRetry}>
           {MESSAGES.REINTENTAR}
-        </button>
+        </Button>
       )}
       {(type === 'success' || type === 'error') && onBack && (
-        <button type="button" className="btn btn-secondary" onClick={onBack}>
+        <Button variant="outlined" onClick={onBack}>
           {MESSAGES.VOLVER}
-        </button>
+        </Button>
       )}
-    </div>
+    </Box>
   )
 }

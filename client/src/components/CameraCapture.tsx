@@ -107,13 +107,8 @@ export function CameraCapture({
     }
     setIsValidating(true)
     try {
-      const result = await runDocumentValidations(blob)
-      if (!result.valid) {
-        setValidationError(result.errors[0] ?? MESSAGES.CAPTURE_FAILED)
-        return
-      }
-
       if (enableAi) {
+        // Con AI activo: capturar primero, validar con AI y mostrar sus errores
         const aiResult = await validateDocumentWithAi(blob, side, apiUrl ?? '')
         if (!isAiValidationValid(aiResult)) {
           setValidationError(mapAiErrorsToMessage(aiResult.errors))
@@ -127,6 +122,12 @@ export function CameraCapture({
         return
       }
 
+      // Sin AI: validación local (blur, iluminación, contraste, etc.)
+      const result = await runDocumentValidations(blob)
+      if (!result.valid) {
+        setValidationError(result.errors[0] ?? MESSAGES.CAPTURE_FAILED)
+        return
+      }
       onCapture(blob)
     } catch {
       setValidationError(enableAi ? MESSAGES.AI_VALIDATION_FAILED : MESSAGES.CAPTURE_FAILED)

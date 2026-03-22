@@ -12,6 +12,8 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   ESTADO_CIVIL_CASADO: 'Casado',
   ESTADO_CIVIL_DIVORCIADO: 'Divorciado',
   ESTADO_CIVIL_VIUDO: 'Viudo',
+  OCUPACION: 'Ocupación',
+  OCUPACION_PLACEHOLDER: 'Ej.: Comerciante, Ingeniero, Estudiante...',
   PROVINCIA: 'Provincia',
   PROVINCIA_PLACEHOLDER: 'Seleccione provincia',
   CANTON: 'Cantón',

@@ -5,6 +5,7 @@ import ubicacionData from '../data/ubicacion-costa-rica.json'
 export interface PersonalData {
   nombreCompleto: string
   estadoCivil: string
+  ocupacion: string
   provincia: string
   canton: string
   distrito: string
@@ -27,6 +28,7 @@ type UbicacionData = Record<string, Record<string, string[]>>
 export function InformationStep({ onContinue }: InformationStepProps) {
   const [nombreCompleto, setNombreCompleto] = useState('')
   const [estadoCivil, setEstadoCivil] = useState('')
+  const [ocupacion, setOcupacion] = useState('')
   const [provincia, setProvincia] = useState('')
   const [canton, setCanton] = useState('')
   const [distrito, setDistrito] = useState('')
@@ -67,7 +69,7 @@ export function InformationStep({ onContinue }: InformationStepProps) {
       setError(MESSAGES.NOMBRE_REQUERIDO)
       return
     }
-    if (!estadoCivil || !provincia || !canton || !distrito) {
+    if (!estadoCivil || !ocupacion.trim() || !provincia || !canton || !distrito) {
       setError(MESSAGES.CAMPOS_REQUERIDOS)
       return
     }
@@ -79,6 +81,7 @@ export function InformationStep({ onContinue }: InformationStepProps) {
     onContinue({
       nombreCompleto: trimmedNombre,
       estadoCivil,
+      ocupacion: ocupacion.trim(),
       provincia,
       canton,
       distrito,
@@ -127,6 +130,22 @@ export function InformationStep({ onContinue }: InformationStepProps) {
               </option>
             ))}
           </select>
+        </div>
+        <div className="form-field">
+          <label htmlFor="ocupacion">{MESSAGES.OCUPACION} <span className="required">*</span></label>
+          <input
+            id="ocupacion"
+            type="text"
+            value={ocupacion}
+            onChange={(e) => {
+              setOcupacion(e.target.value)
+              clearError()
+            }}
+            placeholder={MESSAGES.OCUPACION_PLACEHOLDER}
+            className="name-input"
+            autoComplete="organization-title"
+            required
+          />
         </div>
         <div className="form-field">
           <label htmlFor="provincia">{MESSAGES.PROVINCIA} <span className="required">*</span></label>

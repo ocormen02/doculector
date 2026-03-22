@@ -78,6 +78,7 @@ function createPdf(frontBuffer, backBuffer, personalData) {
 
     addField('Nombre', fullName)
     addField('Estado civil', personalData.estadoCivil)
+    addField('Ocupación', personalData.ocupacion)
     const lugar = [personalData.provincia, personalData.canton, personalData.distrito].filter(Boolean).join(' / ')
     addField('Lugar', lugar)
     addField('Dirección', personalData.direccionExacta)

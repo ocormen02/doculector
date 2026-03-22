@@ -5,7 +5,7 @@ export const MESSAGES = {
 Su información personal será tratada con estricta confidencialidad y conforme a los principios de privacidad y resguardo de datos aplicables. Esta aplicación ha sido concebida para facilitar una recolección segura, ordenada y confidencial de su documentación.`,
   CONTINUAR: 'Continuar',
   NOMBRE_APELLIDOS: 'Datos personales',
-  NOMBRE_CON_APELLIDOS: 'Nombre con apellidos',
+  NOMBRE_CON_APELLIDOS: 'Nombre y apellidos (Coincidir con la identificación)',
   NOMBRE_CON_APELLIDOS_PLACEHOLDER: 'Ej.: María González López',
   ESTADO_CIVIL: 'Estado civil',
   ESTADO_CIVIL_SOLTERO: 'Soltero',
@@ -63,6 +63,8 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   AI_FRAMING:
     'El documento debe estar completo, centrado y cercano al encuadre. Acérquese más: el documento debe ocupar la mayor parte de la imagen, sin quedar muy alejado o pequeño.',
   AI_SIDE_MISMATCH: 'La imagen no corresponde al lado esperado del documento.',
+  AI_NAME_MISMATCH:
+    'El nombre ingresado no coincide con el que aparece en el documento.',
   AI_WRONG_DOCUMENT:
     'Solo se aceptan documentos de identidad de Costa Rica: cédula, DIMEX o documento especial (refugiado, provisional, permiso de extranjero). No se aceptan pasaportes, licencias de conducir ni otras identificaciones.',
   AI_FRONT_BACK_MISMATCH: 'El documento frontal y trasero no coinciden.',

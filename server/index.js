@@ -154,9 +154,9 @@ async function sendEmail(pdfBuffer, fullName = '') {
 
 app.post('/api/validate-document', async (req, res) => {
   try {
-    const { imageBase64, side } = req.body || {}
+    const { imageBase64, side, fullName } = req.body || {}
     const imageSize = typeof imageBase64 === 'string' ? Math.round(imageBase64.length / 1024) : 0
-    console.log(`[validate-document] Request received: side="${side}", imageBase64 length=${imageSize}KB`)
+    console.log(`[validate-document] Request received: side="${side}", imageBase64 length=${imageSize}KB`, fullName ? ', fullName provided' : '')
     if (typeof imageBase64 !== 'string' || !['front', 'back'].includes(side)) {
       console.warn('[validate-document] Invalid request: missing imageBase64 or invalid side')
       return res.status(400).json({
@@ -164,7 +164,7 @@ app.post('/api/validate-document', async (req, res) => {
         error: 'Invalid request: imageBase64 and side (front|back) required',
       })
     }
-    const result = await documentValidationProvider.validate(imageBase64, side)
+    const result = await documentValidationProvider.validate(imageBase64, side, fullName)
     console.log(`[validate-document] Success: documentType=${result.documentType}, valid=${result.documentDetected && !result.isBlurry && result.lightingOk && result.framingOk && result.sideMatches}`)
     return res.json(result)
   } catch (err) {

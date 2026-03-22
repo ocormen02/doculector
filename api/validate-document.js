@@ -29,9 +29,9 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
-    const { imageBase64, side } = body || {}
+    const { imageBase64, side, fullName } = body || {}
     const imageSize = typeof imageBase64 === 'string' ? Math.round(imageBase64.length / 1024) : 0
-    console.log(`[validate-document] Request: side="${side}", imageBase64=${imageSize}KB`)
+    console.log(`[validate-document] Request: side="${side}", imageBase64=${imageSize}KB`, fullName ? ', fullName provided' : '')
 
     if (typeof imageBase64 !== 'string' || !['front', 'back'].includes(side)) {
       console.warn('[validate-document] Invalid request')
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       })
     }
 
-    const result = await documentValidationProvider.validate(imageBase64, side)
+    const result = await documentValidationProvider.validate(imageBase64, side, fullName)
     console.log(`[validate-document] Success: documentType=${result.documentType}, valid=${result.documentDetected && !result.isBlurry && result.lightingOk && result.framingOk && result.sideMatches}`)
     return res.status(200).json(result)
   } catch (err) {

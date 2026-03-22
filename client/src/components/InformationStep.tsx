@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -21,6 +21,8 @@ export interface PersonalData {
 
 interface InformationStepProps {
   onContinue: (data: PersonalData) => void
+  initialData?: PersonalData | null
+  initialNameError?: string | null
 }
 
 const ESTADOS_CIVILES = [
@@ -32,15 +34,36 @@ const ESTADOS_CIVILES = [
 
 type UbicacionData = Record<string, Record<string, string[]>>
 
-export function InformationStep({ onContinue }: InformationStepProps) {
-  const [nombreCompleto, setNombreCompleto] = useState('')
-  const [estadoCivil, setEstadoCivil] = useState('')
-  const [ocupacion, setOcupacion] = useState('')
-  const [provincia, setProvincia] = useState('')
-  const [canton, setCanton] = useState('')
-  const [distrito, setDistrito] = useState('')
-  const [direccionExacta, setDireccionExacta] = useState('')
+export function InformationStep({
+  onContinue,
+  initialData,
+  initialNameError,
+}: InformationStepProps) {
+  const [nombreCompleto, setNombreCompleto] = useState(initialData?.nombreCompleto ?? '')
+  const [estadoCivil, setEstadoCivil] = useState(initialData?.estadoCivil ?? '')
+  const [ocupacion, setOcupacion] = useState(initialData?.ocupacion ?? '')
+  const [provincia, setProvincia] = useState(initialData?.provincia ?? '')
+  const [canton, setCanton] = useState(initialData?.canton ?? '')
+  const [distrito, setDistrito] = useState(initialData?.distrito ?? '')
+  const [direccionExacta, setDireccionExacta] = useState(initialData?.direccionExacta ?? '')
   const [error, setError] = useState('')
+  const [nombreError, setNombreError] = useState(initialNameError ?? '')
+
+  useEffect(() => {
+    if (initialData) {
+      setNombreCompleto(initialData.nombreCompleto ?? '')
+      setEstadoCivil(initialData.estadoCivil ?? '')
+      setOcupacion(initialData.ocupacion ?? '')
+      setProvincia(initialData.provincia ?? '')
+      setCanton(initialData.canton ?? '')
+      setDistrito(initialData.distrito ?? '')
+      setDireccionExacta(initialData.direccionExacta ?? '')
+    }
+  }, [initialData])
+
+  useEffect(() => {
+    setNombreError(initialNameError ?? '')
+  }, [initialNameError])
 
   const provincias = useMemo(() => Object.keys(ubicacionData as UbicacionData), [])
   const cantones = useMemo(
@@ -110,10 +133,16 @@ export function InformationStep({ onContinue }: InformationStepProps) {
               fullWidth
               label={MESSAGES.NOMBRE_CON_APELLIDOS}
               value={nombreCompleto}
-              onChange={(e) => { setNombreCompleto(e.target.value); clearError() }}
+              onChange={(e) => {
+                setNombreCompleto(e.target.value)
+                setNombreError('')
+                setError('')
+              }}
               placeholder={MESSAGES.NOMBRE_CON_APELLIDOS_PLACEHOLDER}
               autoComplete="name"
               required
+              error={!!nombreError}
+              helperText={nombreError}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>

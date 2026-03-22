@@ -7,6 +7,7 @@ export type DocumentAiValidationResult = {
   lightingOk: boolean
   framingOk: boolean
   sideMatches: boolean
+  nameMatches?: boolean
   confidence: number
   errors: string[]
 }

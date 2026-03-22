@@ -76,6 +76,7 @@ function App() {
   const [backBlob, setBackBlob] = useState<Blob | null>(null)
   const [frontAiResult, setFrontAiResult] = useState<DocumentAiValidationResult | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [nameFieldError, setNameFieldError] = useState<string | null>(null)
 
   const frontPreviewUrl = useMemo(
     () => (frontBlob ? URL.createObjectURL(frontBlob) : null),
@@ -147,6 +148,7 @@ function App() {
     setBackBlob(null)
     setFrontAiResult(null)
     setErrorMessage(null)
+    setNameFieldError(null)
   }, [])
 
   if (step === 'sending') {
@@ -197,15 +199,21 @@ function App() {
   if (step === 'name') {
     return (
       <AppContainer>
-        <InformationStep onContinue={(data) => {
-          setPersonalData(data)
-          setStep('capture_front')
-        }} />
+        <InformationStep
+          initialData={personalData}
+          initialNameError={nameFieldError}
+          onContinue={(data) => {
+            setPersonalData(data)
+            setNameFieldError(null)
+            setStep('capture_front')
+          }}
+        />
       </AppContainer>
     )
   }
 
   if (step === 'capture_front') {
+    const fullName = personalData?.nombreCompleto?.trim() ?? ''
     return (
       <AppContainer>
         <CameraCapture
@@ -216,8 +224,17 @@ function App() {
             setStep('preview_front')
           }}
           onError={(msg) => setErrorMessage(msg)}
+          onNameMismatch={
+            ENABLE_AI
+              ? () => {
+                  setNameFieldError(MESSAGES.AI_NAME_MISMATCH)
+                  setStep('name')
+                }
+              : undefined
+          }
           enableAi={ENABLE_AI}
           apiUrl={API_URL}
+          fullName={fullName}
         />
       </AppContainer>
     )

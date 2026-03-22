@@ -2,6 +2,7 @@
   "name": "recolector-documentos",
   "private": true,
   "scripts": {
+    "start": "npx concurrently \"npm run server\" \"npm run dev\"",
     "dev": "cd client && npm run dev",
     "build": "cd client && npm run build",
     "server": "cd server && npm start",

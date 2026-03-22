@@ -15,6 +15,22 @@ async function blobToBase64(blob: Blob): Promise<string> {
   })
 }
 
+/** Error codes for the client to show specific messages */
+export const VALIDATION_ERROR_CODES = {
+  NETWORK: 'NETWORK_ERROR',
+  TIMEOUT: 'TIMEOUT_ERROR',
+  SERVER: 'SERVER_ERROR',
+} as const
+
+export class DocumentValidationError extends Error {
+  readonly code: keyof typeof VALIDATION_ERROR_CODES
+  constructor(message: string, code: keyof typeof VALIDATION_ERROR_CODES) {
+    super(message)
+    this.name = 'DocumentValidationError'
+    this.code = code
+  }
+}
+
 export async function validateDocumentWithAi(
   blob: Blob,
   side: 'front' | 'back',
@@ -43,7 +59,10 @@ export async function validateDocumentWithAi(
     try {
       data = await res.json()
     } catch {
-      throw new Error(res.ok ? 'Invalid response format' : 'Validation request failed')
+      throw new DocumentValidationError(
+        res.ok ? 'Invalid response format' : 'Could not reach validation service',
+        'SERVER'
+      )
     }
 
     if (typeof data === 'object' && data !== null && 'errors' in data && Array.isArray((data as { errors: unknown }).errors)) {
@@ -52,16 +71,22 @@ export async function validateDocumentWithAi(
 
     if (!res.ok) {
       const err = data as { error?: string }
-      throw new Error(err?.error ?? 'Validation request failed')
+      throw new DocumentValidationError(err?.error ?? 'Validation request failed', 'SERVER')
     }
 
     return data as DocumentAiValidationResult
   } catch (err) {
     clearTimeout(timeoutId)
+    if (err instanceof DocumentValidationError) throw err
     if (err instanceof Error) {
-      if (err.name === 'AbortError') throw new Error('Validation timeout')
-      throw err
+      if (err.name === 'AbortError') {
+        throw new DocumentValidationError('Validation timeout', 'TIMEOUT')
+      }
+      if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('Load failed')) {
+        throw new DocumentValidationError('Could not reach validation service. Is the server running?', 'NETWORK')
+      }
+      throw new DocumentValidationError(err.message, 'SERVER')
     }
-    throw new Error('Validation request failed')
+    throw new DocumentValidationError('Validation request failed', 'SERVER')
   }
 }

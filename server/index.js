@@ -105,7 +105,7 @@ function createPdf(frontBuffer, backBuffer, personalData) {
     doc.setFontSize(10)
     doc.text(label, centerX, y + labelHeight / 2, { align: 'center' })
     const imgData = `data:image/jpeg;base64,${buffer.toString('base64')}`
-    doc.addImage(imgData, 'JPEG', imgX, y + labelHeight, imgWidth, imgHeight, undefined, 'FAST')
+    doc.addImage(imgData, 'JPEG', imgX, y + labelHeight, imgWidth, imgHeight, undefined, 'NONE')
   }
 
   addImageBlock(frontBuffer, 'Frontal', topOffset)

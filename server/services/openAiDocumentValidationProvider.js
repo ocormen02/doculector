@@ -29,7 +29,7 @@ CRITICAL - FRAMING (framingOk: false, errors: ["bad_framing"]) REJECT when:
 - Document is severely tilted or angled (más de ~15 grados)
 - Photo of a photo / screenshot / photocopy (mala fotografía del documento)
 - Document is not centered or does not fill most of the frame appropriately
-- Document is TOO FAR AWAY / TOO SMALL in the frame (muy alejado) - the document must fill at least ~60% of the image area. A small margin around the document is OK, but if the document appears small with lots of empty space around it, REJECT. Many users take the photo too far away.
+- Document is TOO FAR AWAY / TOO SMALL in the frame (muy alejado) - the document must fill at least ~90% of the image area. A small margin around the document is OK, but if the document appears small with lots of empty space around it, REJECT. Many users take the photo too far away.
 - framingOk: true ONLY when the ENTIRE document is visible, properly oriented, not tilted, centered, fills the frame adequately (not too distant), and it is a direct photo of the physical document.
 
 {

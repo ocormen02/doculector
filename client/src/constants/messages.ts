@@ -36,6 +36,10 @@ Su información personal será tratada con estricta confidencialidad y conforme 
   FRAME_INSTRUCTION:
     'Procure que el documento de identidad quede correctamente centrado dentro del recuadro delimitado por las líneas discontinuas.',
   ENVIAR: 'Enviar',
+  MANUAL_UPLOAD_TITLE: 'Carga manual del documento',
+  MANUAL_UPLOAD_OPTIONAL_DATA_HINT:
+    'Los datos personales son opcionales. Si los completa, aparecerán en el PDF; si no, solo se adjuntarán las imágenes.',
+  SELECT_IMAGE: 'Seleccionar imagen',
   PRIVACY_NOTE: 'Sus documentos serán enviados de forma segura.',
   CAMERA_PERMISSION_DENIED:
     'Se necesita permiso para usar la cámara. Por favor, habilítelo en la configuración del navegador.',
